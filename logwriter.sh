@@ -8,6 +8,10 @@ elif [ $1 -eq 2 ]
 then
     echo 'May 22 02:13:22 localhost sshd[13949]: Accepted publickey for vagrant from 10.0.2.2 port 64565 ssh2: RSA SHA256:WeegtaAAFxNXdrRFSJfQ7Yc1sJQLOqYZTzr4uRjByyQ' >> /home/testlog.log
 
+elif [ $1 -eq 3 ]
+then
+    echo 'Jun 30 23:58:38 debian sshd[13444]: Failed password for root from 112.85.42.146 port 56969 ssh2' >> /home/testlog.log
+
 else
     echo Invalid argument
 fi
