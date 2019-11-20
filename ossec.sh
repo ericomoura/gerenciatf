@@ -14,11 +14,11 @@ cd ossec-hids-3.1.0
 sh install.sh
 /var/ossec/bin/ossec-control start
 
-git clone https://github.com/ossec/ossec-wui.git
-mv  ossec-wui /srv
-cd /srv/ossec-wui
-./setup.sh
-nano /etc/apache2/sites-enabled/ossec-wui.conf
+# git clone https://github.com/ossec/ossec-wui.git
+# mv  ossec-wui /srv
+# cd /srv/ossec-wui
+# ./setup.sh
+# nano /etc/apache2/sites-enabled/ossec-wui.conf
 
 # <VirtualHost *:80>
 #      DocumentRoot /srv/ossec-wui/
@@ -36,5 +36,5 @@ nano /etc/apache2/sites-enabled/ossec-wui.conf
 #      CustomLog /var/log/apache2/moodle-access.log combined
 # </VirtualHost>
 
-a2enmod rewrite
-service apache2 restart
+# a2enmod rewrite
+# service apache2 restart
