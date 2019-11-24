@@ -38,3 +38,8 @@ sh install.sh
 
 # a2enmod rewrite
 # service apache2 restart
+
+cp ./local_rules.xml /var/ossec/rules/local_rules.xml
+cp ./decoder.xml /var/ossec/etc/decoder.xml
+cp ./ossec.conf /var/ossec/etc/ossec.conf
+/var/ossec/bin/ossec-control restart
