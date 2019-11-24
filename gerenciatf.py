@@ -1,11 +1,41 @@
 import Tkinter
 import threading
 import subprocess
+import json
+import time
 
 global testRuleAlertsVar, sshAcceptedAlertsVar, sshAuthFailAlertsVar, sshInvalidUserAlertsVar
-
+global alerts
+alerts = []
 containerName = "ubuntu"
 
+def runAlertsThread():
+    while True:
+        bashCommand = "docker cp " + containerName + ":/var/ossec/logs/alerts/alerts.json ./alerts.json"
+        subprocess.call(bashCommand.split(' '))
+        alerts = []
+        with open('./alerts.json', 'r') as alertsFile:
+            fullFile = alertsFile.read()
+            lines = fullFile.split('\n')
+            for line in lines:
+                if(line != ""):
+                    alerts.append(json.loads(line))
+        
+        testRuleAlertsVar.set('0')
+        sshAcceptedAlertsVar.set('0')
+        sshAuthFailAlertsVar.set('0')
+        sshInvalidUserAlertsVar.set('0')
+        for alert in alerts:
+            if(alert["rule"]["comment"] == "test rule"):
+                testRuleAlertsVar.set(str(int(testRuleAlertsVar.get())+1))
+            elif(alert["rule"]["comment"] == "First time user logged in."):
+                sshAcceptedAlertsVar.set(str(int(sshAcceptedAlertsVar.get())+1))
+            elif(alert["rule"]["comment"] == "SSHD authentication failed."):
+                sshAuthFailAlertsVar.set(str(int(sshAuthFailAlertsVar.get())+1))
+            elif(alert["rule"]["comment"] == "Attempt to login using a non-existent user"):
+                sshInvalidUserAlertsVar.set(str(int(sshInvalidUserAlertsVar.get())+1))
+               
+        time.sleep(5)
 
 def logEntryTestRule():
     bashCommand = "docker exec " + containerName + " /gerenciatf/logwriter.sh 1"
@@ -18,6 +48,12 @@ def logEntrySSHAuthFail():
     subprocess.call(bashCommand.split(' '))
 def logEntrySSHInvalidUser():
     bashCommand = "docker exec " + containerName + " /gerenciatf/logwriter.sh 4"
+    subprocess.call(bashCommand.split(' '))
+def logEntryClearLog():
+    bashCommand = "docker exec " + containerName + " /gerenciatf/logwriter.sh 999"
+    subprocess.call(bashCommand.split(' '))
+def logEntryClearAlerts():
+    bashCommand = "docker exec " + containerName + " /gerenciatf/logwriter.sh 99"
     subprocess.call(bashCommand.split(' '))
 
 bashCommand = "chmod +x ./logwriter.sh"
@@ -41,6 +77,8 @@ logButtonTestRule = Tkinter.Button(window, text="Test Rule", command=logEntryTes
 logButtonSSHAccepted = Tkinter.Button(window, text="SSH Accepted", command=logEntrySSHAccepted)
 logButtonSSHAuthFail = Tkinter.Button(window, text="SSH Authentication Failed", command=logEntrySSHAuthFail)
 logButtonSSHInvalidUser = Tkinter.Button(window, text="SSH Invalid User", command=logEntrySSHInvalidUser)
+logButtonClearLog = Tkinter.Button(window, text="CLEAR LOG", command=logEntryClearLog)
+logButtonClearAlerts = Tkinter.Button(window, text="CLEAR ALERTS", command=logEntryClearAlerts)
 
 alertsLabel = Tkinter.Label(window, text="ALERTS INFO")
 testRuleAlertsLabel = Tkinter.Label(window, text="Test rule alerts:")
@@ -57,6 +95,8 @@ logButtonTestRule.grid(row=1, column=0)
 logButtonSSHAccepted.grid(row=2, column=0)
 logButtonSSHAuthFail.grid(row=3, column=0)
 logButtonSSHInvalidUser.grid(row=4, column=0)
+logButtonClearLog.grid(row=5, column=0)
+logButtonClearAlerts.grid(row=6, column=0)
 
 alertsLabel.grid(row=0, column=1)
 testRuleAlertsLabel.grid(row=1, column=1)
@@ -68,5 +108,7 @@ sshAuthFailAlertsNum.grid(row=3, column=2)
 sshInvalidUserAlertsLabel.grid(row=4, column=1)
 sshInvalidUserAlertsNum.grid(row=4, column=2)
 
+alertsThread = threading.Thread(target=runAlertsThread)
+alertsThread.start()
 
 window.mainloop()
