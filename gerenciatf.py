@@ -3,6 +3,8 @@ import threading
 import subprocess
 import json
 import time
+import matplotlib.pyplot as plt
+import matplotlib.animation as anim
 
 global testRuleAlertsVar, sshAcceptedAlertsVar, sshAuthFailAlertsVar, sshInvalidUserAlertsVar
 global alerts
@@ -55,6 +57,17 @@ def logEntryClearLog():
 def logEntryClearAlerts():
     bashCommand = "docker exec " + containerName + " /gerenciatf/logwriter.sh 99"
     subprocess.call(bashCommand.split(' '))
+    
+def plotSSHChart(i):
+    ax.clear()
+    labels = ['Current', 'Allowed']
+    currentSSHs = int(sshAuthFailAlertsVar.get())
+    sizes = [currentSSHs, 10-currentSSHs]
+    
+    ax.set_title("SSH Authentication Failures")
+    ax.pie(sizes, labels=labels, autopct="%1.1f%%", shadow=True)
+    ax.axis('equal')
+    ax.legend()
 
 bashCommand = "chmod +x ./logwriter.sh"
 subprocess.call(bashCommand.split(' '))
@@ -110,5 +123,10 @@ sshInvalidUserAlertsNum.grid(row=4, column=2)
 
 alertsThread = threading.Thread(target=runAlertsThread)
 alertsThread.start()
+
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ani = anim.FuncAnimation(fig, plotSSHChart, interval=1000)
+fig.show()
 
 window.mainloop()
