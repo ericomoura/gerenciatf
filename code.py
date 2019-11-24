@@ -2,7 +2,7 @@ import subprocess
 import json
 
 bashCommand = "docker cp f9c0011705d3:/var/ossec/logs/alerts/alerts.json ./alerts.json"
-logwriterCommand = "docker exec f9c0011705d3 /gerenciatf/logwriter.sh 1"
+logwriterCommand = "docker exec f9c0011705d3 /gerenciatf/logwriter.sh 0"
 
 
 subprocess.call(logwriterCommand.split(' '))
@@ -17,5 +17,5 @@ with open('./alerts.json', 'r') as alertsFile:
             alerts.append(json.loads(line))
 
 for alert in alerts:
-    print(alert["decoder"])
+    print(alert["rule"]["comment"])
 
